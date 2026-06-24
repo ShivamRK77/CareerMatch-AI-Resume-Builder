@@ -7,27 +7,50 @@ const NEON_TEXT = "text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 
 
 const JobMatcher = ({ userId }) => {
     const [url, setUrl] = useState('');
+    const [jobRole, setJobRole] = useState('');
     const [status, setStatus] = useState('idle'); // idle, scanning, complete, error
     const [result, setResult] = useState(null);
 
+    const roles = [
+        "MERN Developer",
+        "Full Stack Developer",
+        "Software Engineer",
+        "Data Scientist",
+        "Data Analyst",
+        "Backend Developer",
+        "Frontend Developer",
+        "Cloud Architect"
+    ];
+
     const handleScan = async () => {
-        if (!url) return;
+        if (!url || !jobRole) return;
         setStatus('scanning');
 
         try {
             // In a real app, this fetches data from your backend
-            const response = await fetch('http://127.0.0.1:5000/scan-job', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url, userId })
-            });
-            const data = await response.json();
+            // const response = await fetch('http://127.0.0.1:5000/scan-job', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ url, userId, jobRole })
+            // });
+            // const data = await response.json();
             
-            // Simulate a slight delay for the "AI thinking" effect
+            // Simulate AI generating role-specific mock data
             setTimeout(() => {
-                setResult(data);
+                const mockData = {
+                    company: "TechNova Solutions",
+                    jobTitle: jobRole,
+                    matchScore: Math.floor(Math.random() * 30) + 55, // 55-85
+                    missingKeywords: jobRole.includes('Developer') || jobRole.includes('Engineer') 
+                        ? ["CI/CD Pipelines", "GraphQL", "AWS EC2", "Microservices Architecture"]
+                        : ["Machine Learning Models", "Pandas", "Data Visualization", "ETL Pipelines"],
+                    foundKeywords: ["JavaScript", "React", "Node.js", "Git", "Problem Solving"],
+                    tailoredSummary: `Experienced ${jobRole} with a strong foundation in building scalable solutions. Proven ability to quickly adapt to new technologies and drive project success. Currently focusing on expanding expertise in cloud architecture to deliver high-performance applications.`
+                };
+                
+                setResult(mockData);
                 setStatus('complete');
-            }, 2000);
+            }, 2500);
 
         } catch (error) {
             console.error("Scan failed:", error);
@@ -46,24 +69,46 @@ const JobMatcher = ({ userId }) => {
                     Targeted <span className={NEON_TEXT}>Job Match</span>
                 </h2>
                 <p className="text-lg text-slate-400 max-w-xl mx-auto">
-                    Paste a LinkedIn or Indeed URL. We'll simulate an ATS scan and tell you exactly why you aren't getting hired.
+                    Paste a LinkedIn or Indeed URL and select the target role. We'll simulate an ATS scan and tell you exactly why you aren't getting hired.
                 </p>
             </div>
 
-            {/* Input Bar */}
-            <div className={`${GLASS_CLASSES} p-2 rounded-2xl flex items-center gap-2 mb-16 relative z-20 transition-all focus-within:border-cyan-500/50 focus-within:shadow-[0_0_30px_-5px_rgba(6,182,212,0.3)]`}>
-                <div className="pl-6 text-slate-400"><Link2 size={24}/></div>
-                <input 
-                    type="text" 
-                    placeholder="Paste job URL here (e.g., https://linkedin.com/jobs/...)" 
-                    className="flex-1 bg-transparent border-none outline-none text-white p-4 font-medium placeholder:text-slate-600 text-lg"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                />
+            {/* Input Area */}
+            <div className={`${GLASS_CLASSES} p-4 rounded-3xl mb-16 relative z-20 flex flex-col md:flex-row gap-4`}>
+                
+                {/* Role Selection */}
+                <div className="md:w-1/3 relative">
+                    <select 
+                        className="w-full h-full min-h-[60px] bg-black/40 border border-white/10 rounded-2xl px-6 text-white font-medium outline-none focus:border-cyan-500/50 transition-all appearance-none cursor-pointer"
+                        value={jobRole}
+                        onChange={(e) => setJobRole(e.target.value)}
+                    >
+                        <option value="" disabled>Select Target Role...</option>
+                        {roles.map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                </div>
+
+                {/* URL Input */}
+                <div className="flex-1 bg-black/40 border border-white/10 rounded-2xl flex items-center px-4 focus-within:border-cyan-500/50 transition-all">
+                    <div className="text-slate-500 mr-2"><Link2 size={20}/></div>
+                    <input 
+                        type="text" 
+                        placeholder="Paste job URL here..." 
+                        className="w-full bg-transparent border-none outline-none text-white py-4 font-medium placeholder:text-slate-600"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                    />
+                </div>
+
+                {/* Scan Button */}
                 <button 
                     onClick={handleScan}
-                    disabled={status === 'scanning'}
-                    className={`px-8 py-4 rounded-xl font-bold text-white transition-all shadow-lg flex items-center gap-2 ${status === 'scanning' ? 'bg-slate-800 cursor-wait' : 'bg-gradient-to-r from-cyan-500 to-violet-600 hover:shadow-cyan-500/25 hover:scale-105'}`}
+                    disabled={status === 'scanning' || !url || !jobRole}
+                    className={`px-8 py-4 rounded-2xl font-bold text-white transition-all shadow-lg flex items-center justify-center gap-2 md:w-auto w-full ${
+                        status === 'scanning' || !url || !jobRole 
+                        ? 'bg-slate-800 opacity-50 cursor-not-allowed' 
+                        : 'bg-gradient-to-r from-cyan-500 to-violet-600 hover:shadow-cyan-500/25 hover:scale-105 active:scale-95'
+                    }`}
                 >
                     {status === 'scanning' ? <RefreshCw className="animate-spin" /> : 'Scan Job'}
                 </button>

@@ -4407,7 +4407,7 @@ require('dotenv').config(); // Load environment variables first
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const pdfParse = require('pdf-parse');
+const pdfParse = require('pdf-parse'); // Trigger restart
 const mongoose = require('mongoose');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const bcrypt = require('bcryptjs');
@@ -4431,7 +4431,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/careermatch')
 
 // --- GEMINI AI SETUP ---
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Using Flash for speed
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Using Flash for speed
 
 // --- DATA MODELS ---
 const UserSchema = new mongoose.Schema({
@@ -4616,8 +4616,127 @@ app.post('/scan-job', (req, res) => {
     }), 1000);
 });
 
+// 5. INTERVIEW ANALYZER ROUTE
+app.post('/api/interview/analyze', async (req, res) => {
+    try {
+        const { question, transcript } = req.body;
+        if (!transcript) return res.status(400).json({ message: "No transcript provided" });
+
+        const prompt = `
+        Act as an expert Interview Coach.
+        The interviewer asked: "${question}"
+        The candidate answered verbally (transcribed to text): "${transcript}"
+
+        Analyze the answer and provide feedback. Since this is transcribed speech, infer their clarity, vocabulary, and confidence from the phrasing and sentence structure.
+        Return a valid JSON object strictly matching this structure without any markdown formatting or extra text:
+        {
+            "clarity": Number (0-100),
+            "confidence": Number (0-100),
+            "pronunciationScore": Number (0-100),
+            "vocabularyScore": Number (0-100),
+            "keywords": ["found1", "found2"],
+            "suggestion": "A detailed 3-4 sentence paragraph summarizing the feedback, highlighting specific areas to improve like pronunciation, vocabulary, and structure.",
+            "detailedFeedback": {
+                "pronunciation": "Feedback on inferred pronunciation or speech flow",
+                "vocabulary": "Feedback on word choice and technical terms used",
+                "structure": "Feedback on how the answer was structured (e.g. STAR method)"
+            }
+        }
+        `;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        // Ensure robust parsing by finding the first { and last }
+        const startIdx = text.indexOf('{');
+        const endIdx = text.lastIndexOf('}') + 1;
+        
+        if (startIdx === -1 || endIdx === 0) {
+            throw new Error("Invalid JSON structure returned from AI");
+        }
+        
+        const cleanJson = text.substring(startIdx, endIdx).trim();
+        const analysisData = JSON.parse(cleanJson);
+        
+        res.json(analysisData);
+    } catch (error) {
+        console.error("Interview Analysis Error:", error);
+        res.status(500).json({ message: "Failed to analyze interview response." });
+    }
+});
+
+// 6. YOGI CHATBOT ROUTE
+app.post('/chat', async (req, res) => {
+    try {
+        const { message, history } = req.body;
+        
+        const systemInstruction = `
+        You are Yogi, a friendly and concise career coach chatbot.
+        Your primary function is to answer basic questions related to different job roles, skills required, and career paths.
+        Keep answers concise (under 3 sentences) unless asked for a detailed explanation.
+        If the user greets you, be warm and motivating.
+        Never break character. You are an AI mentor, not a general assistant.
+        `;
+
+        const chatHistory = [
+            {
+                role: "user",
+                parts: [{ text: systemInstruction }],
+            },
+            {
+                role: "model",
+                parts: [{ text: "Understood. I am Yogi, ready to help." }],
+            }
+        ];
+
+        if (history && Array.isArray(history)) {
+            history.forEach(msg => {
+                const mappedRole = msg.role === 'yogi' ? 'model' : 'user';
+                const lastMessage = chatHistory[chatHistory.length - 1];
+                
+                if (lastMessage.role === mappedRole) {
+                    lastMessage.parts[0].text += "\n" + msg.content;
+                } else {
+                    chatHistory.push({
+                        role: mappedRole,
+                        parts: [{ text: msg.content }]
+                    });
+                }
+            });
+        }
+
+        let result;
+        let attempt = 0;
+        const maxAttempts = 3;
+        
+        while (attempt < maxAttempts) {
+            try {
+                const currentModel = attempt < 2 ? model : genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                const chat = currentModel.startChat({ history: chatHistory });
+                result = await chat.sendMessage(message);
+                break;
+            } catch (err) {
+                attempt++;
+                console.log(`⚠️ Gemini API Error on attempt ${attempt}:`, err.status || err.message);
+                if (attempt >= maxAttempts) throw err;
+                await new Promise(res => setTimeout(res, 2000));
+            }
+        }
+
+        const response = await result.response;
+        const text = response.text();
+
+        res.json({ reply: text });
+
+    } catch (error) {
+        console.error("Chat Error:", error);
+        res.status(500).json({ reply: "I'm having trouble connecting right now. Please try again later." });
+    }
+});
+
 // Start Server
-app.listen(PORT, () => console.log(`🚀 Server running on http://127.0.0.1:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on http://127.0.0.1:${PORT}`));
 
 
 
@@ -5034,3 +5153,24 @@ app.listen(PORT, () => console.log(`🚀 Server running on http://127.0.0.1:${PO
 // app.get('/applications', async (req, res) => res.json([]));
 
 // app.listen(PORT, () => console.log(`🚀 Server running on http://127.0.0.1:${PORT}`));
+
+
+
+
+
+
+
+// import express from 'express';
+// import cors from 'cors';
+// // 1. Import the file you just created:
+// import interviewRoutes from './routes/interviewRoutes.js'; 
+
+// const app = express();
+
+// app.use(cors());
+// app.use(express.json()); 
+
+// // 2. Add this line to create the API endpoint:
+// app.use('/api/interview', interviewRoutes);
+
+// // ... the rest of your server code (app.listen, etc.) remains down here ...
