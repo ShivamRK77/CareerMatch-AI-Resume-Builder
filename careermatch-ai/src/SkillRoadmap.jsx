@@ -16,7 +16,8 @@ const SkillRoadmap = () => {
 
         try {
             // In a real app, this would fetch from an AI endpoint
-            // const response = await fetch('http://localhost:5000/api/roadmap', { ... });
+            // const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+            // const response = await fetch(`${backendUrl}/api/roadmap`, { ... });
             
             // Mock AI Generation for now
             setTimeout(() => {

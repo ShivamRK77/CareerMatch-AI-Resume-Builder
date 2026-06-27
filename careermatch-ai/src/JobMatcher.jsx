@@ -28,7 +28,8 @@ const JobMatcher = ({ userId }) => {
 
         try {
             // In a real app, this fetches data from your backend
-            // const response = await fetch('http://127.0.0.1:5000/scan-job', {
+            // const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+            // const response = await fetch(`${backendUrl}/scan-job`, {
             //     method: 'POST',
             //     headers: { 'Content-Type': 'application/json' },
             //     body: JSON.stringify({ url, userId, jobRole })
