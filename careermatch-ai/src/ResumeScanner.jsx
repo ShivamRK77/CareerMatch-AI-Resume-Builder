@@ -341,7 +341,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, FileText, CheckCircle, XCircle, Search, RefreshCw, Briefcase, Target, Sparkles, AlertTriangle, Copy } from 'lucide-react';
 
 /* --- ENVIRONMENT CONFIG --- */
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 /* --- THEME CONSTANTS --- */
 const GLASS_CLASSES = "bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]";
