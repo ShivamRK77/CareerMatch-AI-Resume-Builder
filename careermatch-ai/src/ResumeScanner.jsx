@@ -392,33 +392,41 @@ const ResumeScanner = () => {
         setOptimizedContent(null);
 
         try {
-            const formData = new FormData();
-            formData.append('resume', file);
-            formData.append('role', jobRole);
-            formData.append('userId', 'demo-user');
+            // In a real app, this would fetch from the backend
+            // const formData = new FormData();
+            // formData.append('resume', file);
+            // formData.append('role', jobRole);
+            // formData.append('userId', 'demo-user');
+            //
+            // const response = await fetch(`${API_BASE_URL}/upload`, {
+            //     method: 'POST',
+            //     body: formData
+            // });
+            //
+            // if (!response.ok) {
+            //     throw new Error(`API response was not ok: ${response.status}`);
+            // }
+            //
+            // const data = await response.json();
 
-            // Updated fetch request using the environment variable
-            const response = await fetch(`${API_BASE_URL}/upload`, {
-                method: 'POST',
-                body: formData
-            });
+            // Simulate AI generating role-specific mock data
+            setTimeout(() => {
+                const mappedResult = {
+                    score: Math.floor(Math.random() * 30) + 65, // Random score between 65 and 95
+                    role: jobRole,
+                    missingSkills: jobRole.toLowerCase().includes('data') 
+                        ? ["TensorFlow", "PyTorch", "Hadoop", "Spark"]
+                        : ["Docker", "Kubernetes", "GraphQL", "AWS"],
+                    missingKeywords: jobRole.toLowerCase().includes('data') 
+                        ? ["Machine Learning", "Deep Learning", "Data Mining", "ETL"]
+                        : ["CI/CD", "Microservices", "TDD", "System Design"],
+                    feedback: `Your resume has a strong foundation for a ${jobRole} position. To improve your ATS score, consider adding more quantifiable achievements and integrating the missing skills listed below.`
+                };
 
-            if (!response.ok) {
-                throw new Error(`API response was not ok: ${response.status}`);
-            }
+                setResult(mappedResult);
+                setStatus('complete');
+            }, 2500);
 
-            const data = await response.json();
-
-            const mappedResult = {
-                score: data.score || 0,
-                role: jobRole,
-                missingSkills: data.missingSkills || [],
-                missingKeywords: data.missingSkills ? data.missingSkills.slice(0, 5) : [],
-                feedback: data.summary || "Analysis complete."
-            };
-
-            setResult(mappedResult);
-            setStatus('complete');
         } catch (error) {
             console.error("Error analyzing resume:", error);
             setResult({

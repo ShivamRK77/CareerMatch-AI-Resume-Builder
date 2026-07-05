@@ -34,22 +34,27 @@ const YogiChatbot = () => {
         setIsLoading(true);
 
         try {
-            const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-            const response = await fetch(`${backendUrl}/chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: userMessage.content,
-                    history: messages
-                }),
-            });
-
-            if (!response.ok) throw new Error("API Error");
-
-            const data = await response.json();
-            setMessages([...newMessages, { role: 'yogi', content: data.reply }]);
+            // Mocking the backend API call to ensure it works without the server
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            let reply = "That's a great question! However, I can only provide basic info about tech roles right now. Try asking about a MERN Developer, Data Scientist, or Cloud Architect.";
+            const lowerInput = userMessage.content.toLowerCase();
+            
+            if (lowerInput.includes('mern') || lowerInput.includes('full stack') || lowerInput.includes('fullstack')) {
+                reply = "A MERN/Full Stack Developer uses MongoDB, Express, React, and Node.js. It's a highly demanded role where you build both the frontend and backend using JavaScript!";
+            } else if (lowerInput.includes('data') || lowerInput.includes('scientist') || lowerInput.includes('analyst')) {
+                reply = "Data Scientists and Analysts work with complex datasets to help companies make decisions. You'll need strong skills in Python, SQL, Pandas, and Machine Learning algorithms.";
+            } else if (lowerInput.includes('cloud') || lowerInput.includes('architect')) {
+                reply = "Cloud Architects design and manage scalable server infrastructures. Key skills include AWS, Azure, Docker, Kubernetes, and understanding CI/CD pipelines.";
+            } else if (lowerInput.includes('frontend') || lowerInput.includes('front end')) {
+                reply = "Frontend Developers build the user interfaces of websites. You should master HTML, CSS, JavaScript, and modern frameworks like React or Vue.";
+            } else if (lowerInput.includes('backend') || lowerInput.includes('back end')) {
+                reply = "Backend Developers work on server-side logic, APIs, and databases. Essential skills include Node.js, Python, Java, SQL, and database management.";
+            } else if (lowerInput.includes('software engineer')) {
+                reply = "Software Engineers design, build, and maintain software systems. It requires strong problem-solving skills, proficiency in languages like Java, C++, or Python, and knowledge of software development lifecycles.";
+            }
+            
+            setMessages([...newMessages, { role: 'yogi', content: reply }]);
         } catch (error) {
             console.error("Chat error:", error);
             setMessages([...newMessages, { role: 'yogi', content: "Oops! I'm having trouble connecting right now. Let's try again later." }]);
