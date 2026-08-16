@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Briefcase, Mic, Sparkles, Compass, Home as HomeIcon, Book, LogIn, X, User, ShieldCheck, Mail, Lock, ScanText } from 'lucide-react';
-import JobMatcher from './JobMatcher';
-import InterviewSimulator from './InterviewSimulator';
-import SkillRoadmap from './SkillRoadmap';
-import ResumeScanner from './ResumeScanner';
-import Home from './Home';
-import Docs from './Docs';
-import YogiChatbot from './YogiChatbot';
+import { Briefcase, Mic, Sparkles, Compass, Home as HomeIcon, Book, LogIn, X, User, ShieldCheck, Mail, Lock, ScanText, FileSearch } from 'lucide-react';
+import JobMatcher from './pages/JobMatcher';
+import InterviewSimulator from './pages/InterviewSimulator';
+import SkillRoadmap from './pages/SkillRoadmap';
+import ResumeScanner from './pages/ResumeScanner';
+import JdMatcher from './pages/JdMatcher';
+import Home from './pages/Home';
+import Docs from './pages/Docs';
+import YogiChatbot from './components/YogiChatbot';
 import './App.css';
 
 const App = () => {
@@ -38,16 +39,15 @@ const App = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
       </div>
 
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4">
-        <div className={`max-w-[90rem] mx-auto flex items-center justify-between px-8 py-4 rounded-3xl ${GLASS_CLASSES}`}>
+      <nav className="fixed top-0 left-0 w-full z-50 px-4 py-4">
+        <div className={`max-w-[90rem] mx-auto flex items-center justify-between px-4 lg:px-8 py-4 rounded-3xl ${GLASS_CLASSES}`}>
           
           {/* Logo */}
           <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setActiveTab('home')}>
             <div className="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform">
               <Sparkles className="text-white" size={20} />
             </div>
-            <span className="text-xl font-black tracking-tighter text-white">
+            <span className="text-xl font-black tracking-tighter text-white whitespace-nowrap">
               CareerMatch <span className={NEON_TEXT}>AI</span>
             </span>
           </div>
@@ -64,15 +64,23 @@ const App = () => {
             </button>
             <button
               onClick={() => setActiveTab('scanner')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap ${
                 activeTab === 'scanner' ? 'bg-white text-slate-900 shadow-xl' : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <ScanText size={14} /> Scanner
             </button>
             <button
+              onClick={() => setActiveTab('jd-matcher')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap ${
+                activeTab === 'jd-matcher' ? 'bg-white text-slate-900 shadow-xl' : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <FileSearch size={14} /> JD Matcher
+            </button>
+            <button
               onClick={() => setActiveTab('job-matcher')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap ${
                 activeTab === 'job-matcher' ? 'bg-white text-slate-900 shadow-xl' : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -137,6 +145,7 @@ const App = () => {
       <main className="pt-24 pb-20">
         {activeTab === 'home' && <Home />}
         {activeTab === 'scanner' && <ResumeScanner />}
+        {activeTab === 'jd-matcher' && <JdMatcher />}
         {activeTab === 'job-matcher' && <JobMatcher userId="demo-user" />}
         {activeTab === 'interview-simulator' && <InterviewSimulator />}
         {activeTab === 'skill-roadmap' && <SkillRoadmap />}
